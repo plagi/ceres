@@ -42,6 +42,11 @@ class CeresBot:
         # 'price': 0.06682}, 'bybit': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'sell', 'amount': 20,
         # 'price': 0.06707}}, 'profit': {'profit': 0.0009858000000000043, 'profit_pct': 9.858000000000044e-06,
         # 'fees': 0.0040142}}
+        # for exchange, order in orders["exchange_orders"].items():
+        #     amount = order['amount']
+        #     price = order['price']
+        #     params = {}
+
         # binance.create_order('BTC/USDT', 'limit', 'buy', amount, price, params)
         balance_enough = True
         for exchange, order in orders["exchange_orders"].items():
@@ -51,11 +56,13 @@ class CeresBot:
                 balance_enough = False
 
         if balance_enough:
-            self.telegram.send_message(orders)
-
+            msg = "Creating \n"
             for exchange, order in orders["exchange_orders"].items():
                 print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
+                msg += f"{order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
                 res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
+            self.telegram.send_message(msg)
+
         else:
             print("Balance not enough")
         pass
