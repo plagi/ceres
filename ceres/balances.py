@@ -2,7 +2,6 @@ import copy
 import logging
 from typing import NamedTuple
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +50,7 @@ class Balances:
     def get_total(self):
         pass
 
+    # get balance from exchage and update all the _balance dict
     def update_balance(self):
         pass
 

@@ -44,7 +44,7 @@ class ExchangesHandler:
             zip(
                 ex,
                 self.loop.run_until_complete(
-                    self.exchanges[ex].create_order(symbol=self.symbol, type=type, side=side, amount=amount, price=price, params={})    
+                    self.exchanges[ex].create_order(symbol=self.symbol, type=type, side=side, amount=amount, price=price, params={})
                 )
             )
         )
@@ -97,6 +97,7 @@ class ExchangesHandler:
         )
 
     def _load_markets(self):
+        """Load markets for all the exchanges"""
         logger.info(f"Loading markets for exchanges {*self.exchanges_list,}")
         return dict(
             zip(
@@ -108,6 +109,7 @@ class ExchangesHandler:
         )
 
     def _check_symbol_on_exchange(self):
+        """Check if symbol is available on all the exchanges"""
         for ex, market in self.markets.items():
             if not self.symbol in market:
                 raise Exception(

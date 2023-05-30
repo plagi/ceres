@@ -32,15 +32,18 @@ class CeresBot:
         self.create_orders(orders)
 
     def create_orders(self, orders):
-        # {'exchange_orders': {'kucoin': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'buy', 'amount': 20, 'price': 0.06682}, 'bybit': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'sell', 'amount': 20, 'price': 0.06707}}, 'profit': {'profit': 0.0009858000000000043, 'profit_pct': 9.858000000000044e-06, 'fees': 0.0040142}}
+        # {'exchange_orders': {'kucoin': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'buy', 'amount': 20,
+        # 'price': 0.06682}, 'bybit': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'sell', 'amount': 20,
+        # 'price': 0.06707}}, 'profit': {'profit': 0.0009858000000000043, 'profit_pct': 9.858000000000044e-06,
+        # 'fees': 0.0040142}}
         # binance.create_order('BTC/USDT', 'limit', 'buy', amount, price, params)
         balances = self.exchangeshandler.get_balances()
         counter, base = self.symbol.split("/")
         balance_enough = True
         for exchange, order in orders["exchange_orders"].items():
-            if (order['side'] == 'sell' and (counter in balances[exchange]) and  balances[exchange][counter]['free'] < order['amount']):
+            if order['side'] == 'sell' and (counter in balances[exchange]) and  balances[exchange][counter]['free'] < order['amount']:
                 balance_enough = False
-            if (order['side']=='buy' and (base in balances[exchange]) and balances[exchange][base]['free'] < order['amount']*order['price']):
+            if order['side'] == 'buy' and (base in balances[exchange]) and balances[exchange][base]['free'] < order['amount']*order['price']:
                 balance_enough = False
 
         if balance_enough:        
