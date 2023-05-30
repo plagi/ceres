@@ -28,7 +28,7 @@ class CeresBot:
         if not signal:
             return
         logger.info(f'Creating orders now: {orders}')
-        # self.telegram.send_message(orders)
+        self.telegram.send_message(orders)
         self.create_orders(orders)
 
     def create_orders(self, orders):
