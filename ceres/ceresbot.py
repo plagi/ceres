@@ -14,21 +14,23 @@ class CeresBot:
         self._config = config
         if config["dry"]:
             logger.info("Bot is running in dry mode")
-        self.exchangeshandler = ExchangesHandler(self._config)
-        self.wallets = Balances(self._config, self.exchangeshandler)
-        self.strategy = SpotArbitrage(self._config, self.exchangeshandler)
+
+        self.exchangeHandler = ExchangesHandler(self._config)
+        self.wallets = Balances(self._config, self.exchangeHandler)
+        self.strategy = SpotArbitrage(self._config, self.exchangeHandler)
         self.symbol = config['symbol']
+        counter, base = self.symbol.split("/")
+        self.counter = counter
+        self.base = base
         if self._config.get("telegram", None).get('enabled', False):
             self.telegram = Telegram(self._config)
 
     def main_loop(self):
-        # bal = self.exchangeshandler.get_ticker_on_exchanges('BTC/USDT')
-        # logger.info(bal)
+        balances = self.exchangeHandler.get_balances()
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
         logger.info(f'Creating orders now: {orders}')
-        self.telegram.send_message(orders)
         self.create_orders(orders)
 
     def create_orders(self, orders):
@@ -37,8 +39,6 @@ class CeresBot:
         # 'price': 0.06707}}, 'profit': {'profit': 0.0009858000000000043, 'profit_pct': 9.858000000000044e-06,
         # 'fees': 0.0040142}}
         # binance.create_order('BTC/USDT', 'limit', 'buy', amount, price, params)
-        balances = self.exchangeshandler.get_balances()
-        counter, base = self.symbol.split("/")
         balance_enough = True
         for exchange, order in orders["exchange_orders"].items():
             if order['side'] == 'sell' and (counter in balances[exchange]) and  balances[exchange][counter]['free'] < order['amount']:
@@ -46,10 +46,12 @@ class CeresBot:
             if order['side'] == 'buy' and (base in balances[exchange]) and balances[exchange][base]['free'] < order['amount']*order['price']:
                 balance_enough = False
 
-        if balance_enough:        
+        if balance_enough:
+            self.telegram.send_message(orders)
+
             for exchange, order in orders["exchange_orders"].items():
                 print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
-                res = self.exchangeshandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
+                res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
         else:
             print("Balance not enough")
         pass
