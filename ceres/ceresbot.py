@@ -31,8 +31,11 @@ class CeresBot:
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
-        logger.info(f'Creating orders now: {orders}')
-        self.create_orders(orders)
+        if orders['profit']['profit'] > 0.001:
+            logger.info(f'Creating orders now: {orders}')
+            self.create_orders(orders)
+        else:
+            logger.info(f'Profit too low: {orders["profit"]["profit"]}')
 
     def create_orders(self, orders):
         # {'exchange_orders': {'kucoin': {'symbol': 'EVER/USDT', 'type': 'limit', 'side': 'buy', 'amount': 20,
