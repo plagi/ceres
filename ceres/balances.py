@@ -33,13 +33,16 @@ class Balances:
             balances = self._exchangeshandler.get_balances()
             for ex, balance in balances.items():
                 bal = {}
-                for coin, info in balance:
-                    bal[coin] = Asset(
-                        currency=coin,
-                        free=info.get("free", 0),
-                        used=info.get("used", 0),
-                        total=info.get("total", 0),
-                    )
+                # print(ex, balance)
+                for coin, info in balance.items():
+                    # print(coin,info)
+                    if coin not in ["timestamp", "datetime"]:
+                        bal[coin] = Asset(
+                            currency=coin,
+                            free=info.get("free", 0),
+                            used=info.get("used", 0),
+                            total=info.get("total", 0),
+                        )
                 self._initial_balance[ex] = bal
 
     def get_free(self):

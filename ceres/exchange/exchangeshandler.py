@@ -39,6 +39,16 @@ class ExchangesHandler:
     def current_exchanges(self):
         return self.exchanges_list
 
+    def create_order(self, ex, type, side, amount, price):
+        return dict(
+            zip(
+                ex,
+                self.loop.run_until_complete(
+                    self.exchanges[ex].create_order(symbol=self.symbol, type=type, side=side, amount=amount, price=price, params={})    
+                )
+            )
+        )
+
     def get_markets(self):
         if not self.markets:
             self.markets = self._load_markets()

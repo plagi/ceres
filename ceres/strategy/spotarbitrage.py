@@ -75,7 +75,7 @@ class SpotArbitrage(StrategyBase):
                 },
                 'profit': {
                     'profit': profit,
-                    'profit_pct': profit_pct,
+                    'profit_pct': "%.6f" % profit_pct,
                     'fees': min_fee + max_fee
                 }
             }

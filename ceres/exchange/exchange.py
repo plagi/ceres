@@ -2,12 +2,13 @@ from datetime import datetime
 import logging
 
 import ccxt.pro as ccxt
+from ccxt import InsufficientFunds,InvalidOrder, DDoSProtection,BaseError,NetworkError,ExchangeError
 
 from ceres.exchange.exchangehelpers import retrier
 
 logger = logging.getLogger(__name__)
 
-
+print(ccxt.exchanges)
 class Exchange:
     def __init__(self, config, ex_dict={}) -> None:
         self._config = config
@@ -22,6 +23,8 @@ class Exchange:
             "apiKey": ex_dict.get("key"),
             "secret": ex_dict.get("secret"),
             "password": ex_dict.get("password"),
+            "options": ex_dict.get("options"),
+
         }
         try:
             api = getattr(ccxt, name.lower())(ex_config)
@@ -55,12 +58,12 @@ class Exchange:
     async def watch_order_book(self, symbol):
         try:
             return await self.api.watch_order_book(symbol)
-        except ccxt.DDoSProtection as e:
+        except DDoSProtection as e:
             raise Exception(e) from e
-        except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+        except (NetworkError, ExchangeError) as e:
             raise Exception(
                 f'Could not get orderbook data due to {e.__class__.__name__}. Message: {e}') from e
-        except ccxt.BaseError as e:
+        except BaseError as e:
             raise Exception(e) from e
         
     @retrier
@@ -137,22 +140,22 @@ class Exchange:
                 params
             )
             return order
-        except ccxt.InsufficientFunds as e:
+        except InsufficientFunds as e:
             logger.warning(
                 f'Insufficient funds to create {type} {side} order on market {symbol}. '
                 f'Tried to {side} amount {amount} at rate {price}.'
                 f'Message: {e}')
-        except ccxt.InvalidOrder as e:
+        except InvalidOrder as e:
             logger.warning(
                 f'Could not create {type} {side} order on market {symbol}. '
                 f'Tried to {side} amount {amount} at rate {price}. '
                 f'Message: {e}') 
-        except ccxt.DDoSProtection as e:
+        except DDoSProtection as e:
             logger.warning(e)
-        except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+        except (NetworkError, ExchangeError) as e:
             logger.warning(
                 f'Could not place {side} order due to {e.__class__.__name__}. Message: {e}')
-        except ccxt.BaseError as e:
+        except BaseError as e:
             logger.warning(e)
 
     def check_exchange_has(self, method=str) -> bool:
