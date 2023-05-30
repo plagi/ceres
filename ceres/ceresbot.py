@@ -22,11 +22,12 @@ class CeresBot:
         counter, base = self.symbol.split("/")
         self.counter = counter
         self.base = base
+        self.balances = None
         if self._config.get("telegram", None).get('enabled', False):
             self.telegram = Telegram(self._config)
 
     def main_loop(self):
-        balances = self.exchangeHandler.get_balances()
+        self.balances = self.exchangeHandler.get_balances()
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
@@ -41,9 +42,9 @@ class CeresBot:
         # binance.create_order('BTC/USDT', 'limit', 'buy', amount, price, params)
         balance_enough = True
         for exchange, order in orders["exchange_orders"].items():
-            if order['side'] == 'sell' and (counter in balances[exchange]) and  balances[exchange][counter]['free'] < order['amount']:
+            if order['side'] == 'sell' and (self.counter in self.balances[exchange]) and  self.balances[exchange][self.counter]['free'] < order['amount']:
                 balance_enough = False
-            if order['side'] == 'buy' and (base in balances[exchange]) and balances[exchange][base]['free'] < order['amount']*order['price']:
+            if order['side'] == 'buy' and (self.base in self.balances[exchange]) and self.balances[exchange][self.base]['free'] < order['amount']*order['price']:
                 balance_enough = False
 
         if balance_enough:
