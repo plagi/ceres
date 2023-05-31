@@ -70,6 +70,12 @@ class CeresBot:
                 self.total_turnover += order['amount']
                 res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
             msg += f"Profit: {orders['profit']['profit']} Total: { format(self.total_profit, '.5f') } Trades: {self.total_trades} Turnover: {self.total_turnover}  {self.counter}\n"
+            counter_balance = 0
+            base_balance = 0
+            for exchange, balance in self.balances.items():
+                counter_balance += balance[self.counter]['total']
+                base_balance += balance[self.base]['total']
+            msg += f"Balance: { format(counter_balance, '.2f') } {self.counter} {format(base_balance, '.2f')} {self.base}"
             self.telegram.send_message(msg)
 
         else:
