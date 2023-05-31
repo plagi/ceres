@@ -19,6 +19,7 @@ class CeresBot:
         self.wallets = Balances(self._config, self.exchangeHandler)
         self.strategy = SpotArbitrage(self._config, self.exchangeHandler)
         self.symbol = config['symbol']
+        self.min_profit = self._config.get(['min_profit'], 0.005)
         counter, base = self.symbol.split("/")
         self.counter = counter
         self.base = base
@@ -34,7 +35,7 @@ class CeresBot:
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
-        if float(orders['profit']['profit']) > 0.002:
+        if float(orders['profit']['profit']) > 0.005:
             logger.info(f'Creating orders now: {orders}')
             self.create_orders(orders)
         else:
