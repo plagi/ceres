@@ -4,7 +4,7 @@ from typing import Any, Dict
 from telegram import ParseMode, Update
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import CallbackContext, CommandHandler, Updater
-
+from ceres.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -14,15 +14,15 @@ class Telegram:
     This class handles all telegram communication
     """
 
-    def __init__(self, config: Dict[str, Any]) -> None:
+    def __init__(self, config: Config) -> None:
         """
         Init the Telegram call
         :param config: Configuration object as dictionary
         :return: None
         """
-        self._config = config
-        self.token = self._config["telegram"]["token"]
-        self.chat_id = self._config["telegram"]["chat_id"]
+        self.config = config
+        self.token = self.config.telegram_token
+        self.chat_id = self.config.telegram_chat_id
         self._updater = Updater(token=self.token, use_context=True)
         self._init()
 
