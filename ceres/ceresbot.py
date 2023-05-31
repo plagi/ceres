@@ -34,7 +34,7 @@ class CeresBot:
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
-        if orders['profit']['profit'] > 0.002:
+        if float(orders['profit']['profit']) > 0.002:
             logger.info(f'Creating orders now: {orders}')
             self.create_orders(orders)
         else:
