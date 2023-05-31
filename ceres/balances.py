@@ -19,6 +19,7 @@ class Balances:
         self._initial_balance = {}
         self.dry: bool = self._config.get("dry", True)
         self._get_initial_balance()
+        # print(self._initial_balance)
         self._balance = copy.deepcopy(self._initial_balance)
 
     def _get_initial_balance(self):
@@ -44,15 +45,30 @@ class Balances:
                         )
                 self._initial_balance[ex] = bal
 
-    def get_free(self):
-        pass
+    def get_free(self, exchange, currency):
+        return self._balance[exchange][currency].free
 
-    def get_total(self):
-        pass
+    def get_total(self, exchange, currency):
+        return self._balance[exchange][currency].total
 
-    # get balance from exchage and update all the _balance dict
+    def get_total_currency(self, currency: str):
+        total_balance = 0
+        for exchange in self._balance:
+            total_balance += self.get_total(exchange, currency)
+        return total_balance
+
     def update_balance(self):
-        pass
+        balances = self._exchangeshandler.get_balances()
+        for exchange, balance in balances.items():
+            for coin, info in balance.items():
+                if coin not in ["timestamp", "datetime"]:
+                    self._balance[exchange][coin] = Asset(
+                        currency=coin,
+                        free=info.get("free", 0),
+                        used=info.get("used", 0),
+                        total=info.get("total", 0),
+                    )
 
-    def check_free_amount(self):
-        pass
+    def check_free_amount(self, exchange, currency, required_amount):
+        free_amount = self.get_free(exchange, currency)
+        return free_amount >= required_amount

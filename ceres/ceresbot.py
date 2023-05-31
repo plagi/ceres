@@ -19,6 +19,7 @@ class CeresBot:
 
         self.exchangeHandler = ExchangesHandler(self.config)
         self.wallets = Balances(self.config, self.exchangeHandler)
+        print(self.wallets)
         self.strategy = SpotArbitrage(self.config, self.exchangeHandler)
         self.symbol = self.config.symbol
         self.min_profit = self.config.min_profit
@@ -33,7 +34,7 @@ class CeresBot:
             self.telegram = Telegram(self.config)
 
     def main_loop(self):
-        self.balances = self.exchangeHandler.get_balances()
+        self.wallets.update_balance()
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
@@ -50,21 +51,18 @@ class CeresBot:
         return True
 
     def is_balance_insufficient(self, exchange, order):
-        if order['side'] == 'sell' and (self.counter in self.balances[exchange]) and  self.balances[exchange][self.counter]['free'] < order['amount']:
-            return True
-        if order['side'] == 'buy' and (self.base in self.balances[exchange]) and self.balances[exchange][self.base]['free'] < order['amount']*order['price']:
-            return True
+        if order['side'] == 'sell':
+            return not self.wallets.check_free_amount(exchange, self.counter, order['amount'])
+        if order['side'] == 'buy':
+            return not self.wallets.check_free_amount(exchange, self.base, order['amount']*order['price'])
         return False
 
     def get_summary_message(self, orders):
-        msg = f"Profit: {orders['profit']['profit']} Total: { format(self.total_profit, '.5f') } Trades: {self.total_trades} Turnover: {self.total_turnover}  {self.counter}\n"
-        counter_balance = 0
-        base_balance = 0
-        for exchange, balance in self.balances.items():
-            counter_balance += balance[self.counter]['total']
-            base_balance += balance[self.base]['total']
-        msg += f"Balance: { format(counter_balance, '.2f') } {self.counter} {format(base_balance, '.2f')} {self.base}"
-        msg += f"\n { list(orders['exchange_orders'].items())[0]['price'] * counter_balance}"
+        msg = f"Profit: {orders['profit']['profit']} Total: {format(self.total_profit, '.5f')} Trades: {self.total_trades} Turnover: {self.total_turnover}  {self.counter}\n"
+        counter_balance = self.wallets.get_total_currency(self.counter)
+        counter_balance_base = list(orders['exchange_orders'].items())[0][1]['price'] * counter_balance
+        base_balance = self.wallets.get_total_currency(self.base)
+        msg += f"Balance: {format(counter_balance, '.2f')} {self.counter} ({format(counter_balance_base, '.2f')} {self.base}) {format(base_balance, '.2f')} {self.base} ({format(base_balance + counter_balance_base, '.2f')} {self.base})"
         return msg
 
     def execute_orders(self, orders):
@@ -75,6 +73,6 @@ class CeresBot:
             logger.info(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
             msg += f"{order['side']} {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
             self.total_turnover += order['amount']
-            res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
+            # res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
         msg += self.get_summary_message(orders)
         self.telegram.send_message(msg)
