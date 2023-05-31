@@ -72,7 +72,7 @@ class CeresBot:
         self.total_profit += float(orders['profit']['profit'])
         self.total_trades += 1
         for exchange, order in orders["exchange_orders"].items():
-            print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
+            logger.info(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
             msg += f"{order['side']} {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
             self.total_turnover += order['amount']
             res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
