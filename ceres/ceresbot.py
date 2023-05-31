@@ -73,6 +73,6 @@ class CeresBot:
             logger.info(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
             msg += f"{order['side']} {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
             self.total_turnover += order['amount']
-            # res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
+            res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
         msg += self.get_summary_message(orders)
         self.telegram.send_message(msg)
