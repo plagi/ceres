@@ -19,7 +19,7 @@ class CeresBot:
         self.wallets = Balances(self._config, self.exchangeHandler)
         self.strategy = SpotArbitrage(self._config, self.exchangeHandler)
         self.symbol = config['symbol']
-        self.min_profit = self._config.get(['min_profit'], 0.005)
+        self.min_profit = self._config.get('min_profit', 0.005)
         counter, base = self.symbol.split("/")
         self.counter = counter
         self.base = base
@@ -60,16 +60,16 @@ class CeresBot:
                 balance_enough = False
 
         if balance_enough:
-            msg = "Creating \n"
+            msg = ""
             self.total_profit += float(orders['profit']['profit'])
+            self.total_trades += 1
 
             for exchange, order in orders["exchange_orders"].items():
                 print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
-                msg += f"{order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
+                msg += f"{order['side']} {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
                 self.total_turnover += order['amount']
-                self.total_trades += 1
                 res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
-            msg += f'Profit: {orders["profit"]["profit"]} [{self.total_profit}] Trades: {self.total_trades} Turnover: {self.total_turnover}  \n'
+            msg += f'Profit: {orders["profit"]["profit"]} Total: {self.total_profit} Trades: {self.total_trades} Turnover: {self.total_turnover}  {self.counter}\n'
             self.telegram.send_message(msg)
 
         else:
