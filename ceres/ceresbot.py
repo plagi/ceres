@@ -37,11 +37,11 @@ class CeresBot:
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
-        if float(orders['profit']['profit']) > 0.005:
+        if float(orders['profit']['profit']) > self.min_profit and self.check_balance(orders):
             logger.info(f'Creating orders now: {orders}')
-            self.create_orders(orders)
+            self.execute_orders(orders)
         else:
-            logger.info(f'Profit too low: {orders["profit"]["profit"]}')
+            logger.info(f'Profit too low: {orders["profit"]["profit"]} or balance not enough')
 
     def check_balance(self, orders):
         for exchange, order in orders["exchange_orders"].items():
@@ -78,11 +78,3 @@ class CeresBot:
             res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
         msg += self.get_summary_message(orders)
         self.telegram.send_message(msg)
-
-    def create_orders(self, orders):
-        balance_enough = self.check_balance(orders)
-        if balance_enough:
-            self.execute_orders(orders)
-        else:
-            print("Balance not enough")
-
