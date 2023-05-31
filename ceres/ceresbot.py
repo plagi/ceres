@@ -64,7 +64,7 @@ class CeresBot:
             counter_balance += balance[self.counter]['total']
             base_balance += balance[self.base]['total']
         msg += f"Balance: { format(counter_balance, '.2f') } {self.counter} {format(base_balance, '.2f')} {self.base}"
-        msg += f"\n {orders['exchange_orders'].items()[0][0]['price'] * counter_balance}"
+        msg += f"\n { list(orders['exchange_orders'].items())[0]['price'] * counter_balance}"
         return msg
 
     def execute_orders(self, orders):
