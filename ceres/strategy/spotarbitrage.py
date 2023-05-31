@@ -1,3 +1,4 @@
+import heapq
 import logging
 
 from ceres.strategy.strategybase import StrategyBase
@@ -18,12 +19,13 @@ class Fees:
 
 class OrderBook:
     def __init__(self):
-        self.bids = {}
-        self.asks = {}
+        self.bids = []
+        self.asks = []
 
     def update(self, ex, obs):
-        self.bids[ex] = obs[ex]["bids"][0][0]
-        self.asks[ex] = obs[ex]["asks"][0][0]
+        heapq.heappush(self.bids, (-obs[ex]["bids"][0][0], ex))  # Negate bid prices for max heap
+        heapq.heappush(self.asks, (obs[ex]["asks"][0][0], ex))
+
 
 
 class SpotArbitrage(StrategyBase):
@@ -56,10 +58,11 @@ class SpotArbitrage(StrategyBase):
             self.order_book.update(ex, obs)
 
     def _check_profit(self):
-        min_ask_ex = min(self.order_book.asks, key=self.order_book.asks.get)
-        max_bid_ex = max(self.order_book.bids, key=self.order_book.bids.get)
-        min_ask_price = self.order_book.asks[min_ask_ex]
-        max_bid_price = self.order_book.bids[max_bid_ex]
+        min_ask_price, min_ask_ex = heapq.heappop(self.order_book.asks)
+        max_bid_price, max_bid_ex = heapq.heappop(self.order_book.bids)
+
+        if min_ask_ex == max_bid_ex:
+            return False, {}
 
         min_fee = self.order_size * min_ask_price * self.fees.fees[min_ask_ex]["taker"]
         max_fee = self.order_size * max_bid_price * self.fees.fees[max_bid_ex]["taker"]

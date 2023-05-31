@@ -19,7 +19,6 @@ class CeresBot:
 
         self.exchangeHandler = ExchangesHandler(self.config)
         self.wallets = Balances(self.config, self.exchangeHandler)
-        print(self.wallets)
         self.strategy = SpotArbitrage(self.config, self.exchangeHandler)
         self.symbol = self.config.symbol
         self.min_profit = self.config.min_profit
