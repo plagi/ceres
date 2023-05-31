@@ -71,12 +71,10 @@ class CeresBot:
         msg = ""
         self.total_profit += float(orders['profit']['profit'])
         self.total_trades += 1
-        last_price = 0
         for exchange, order in orders["exchange_orders"].items():
             print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
             msg += f"{order['side']} {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
             self.total_turnover += order['amount']
-            last_price = order['price']
             res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
         msg += self.get_summary_message(orders)
         self.telegram.send_message(msg)
