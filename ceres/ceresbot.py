@@ -23,6 +23,9 @@ class CeresBot:
         self.counter = counter
         self.base = base
         self.balances = None
+        self.total_trades = 0
+        self.total_profit = 0
+        self.total_turnover = 0
         if self._config.get("telegram", None).get('enabled', False):
             self.telegram = Telegram(self._config)
 
@@ -31,7 +34,7 @@ class CeresBot:
         signal, orders = self.strategy.check_opportunity()
         if not signal:
             return
-        if orders['profit']['profit'] > 0.001:
+        if orders['profit']['profit'] > 0.002:
             logger.info(f'Creating orders now: {orders}')
             self.create_orders(orders)
         else:
@@ -57,11 +60,15 @@ class CeresBot:
 
         if balance_enough:
             msg = "Creating \n"
+            self.total_profit += float(orders['profit']['profit'])
+
             for exchange, order in orders["exchange_orders"].items():
                 print(f"Placing {order['type']} {order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange}")
                 msg += f"{order['side']} order for {order['amount']} {self.symbol} @ {order['price']} on {exchange} \n"
+                self.total_turnover += order['amount']
+                self.total_trades += 1
                 res = self.exchangeHandler.create_order(exchange, order['type'], order['side'], order['amount'], order['price'])
-            msg += f"Profit: {orders['profit']['profit']} \n"
+            msg += f'Profit: {orders["profit"]["profit"]} [{self.total_profit}] Trades: {self.total_trades} Turnover: {self.total_turnover}  \n'
             self.telegram.send_message(msg)
 
         else:
