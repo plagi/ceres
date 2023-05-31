@@ -72,13 +72,13 @@ class SpotArbitrage(StrategyBase):
             f"{self.symbol}: Profit after fees: {profit}, buy exchange {min_ask_ex} at: {min_ask_price}, sell exchange {max_bid_ex} at: {max_bid_price}"
         )
 
-        # if profit > 0:
-        orders = self._create_orders(min_ask_ex, min_ask_price, max_bid_ex, max_bid_price, profit, profit_pct,
+        if profit > 0:
+            orders = self._create_orders(min_ask_ex, min_ask_price, max_bid_ex, max_bid_price, profit, profit_pct,
                                      min_fee, max_fee)
-        logger.info(f'Found arbitrage opportunity for {self.symbol} between {min_ask_ex} and {max_bid_ex}')
-        return True, orders
+            logger.info(f'Found arbitrage opportunity for {self.symbol} between {min_ask_ex} and {max_bid_ex}')
+            return True, orders
 
-        # return False, {}
+        return False, {}
 
     def _create_orders(self, min_ask_ex, min_ask_price, max_bid_ex, max_bid_price, profit, profit_pct, min_fee,
                        max_fee):
