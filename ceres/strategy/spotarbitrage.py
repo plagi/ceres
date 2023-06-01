@@ -71,7 +71,7 @@ class SpotArbitrage(StrategyBase):
         profit = (price_profit * self.order_size) - (min_fee + max_fee)
         profit_pct = profit / 100
 
-        logger.debug(
+        logger.info(
             f"{self.symbol}: Profit after fees: {profit}, buy exchange {min_ask_ex} at: {min_ask_price}, sell exchange {max_bid_ex} at: {max_bid_price}"
         )
 
