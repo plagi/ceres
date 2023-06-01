@@ -18,8 +18,8 @@ class Fees:
 
 class OrderBook:
     def __init__(self):
-        self.bids = []
-        self.asks = []
+        self.bids = {}
+        self.asks = {}
 
     def update(self, ex, obs):
         self.bids[ex] = obs[ex]["bids"][0][0]
