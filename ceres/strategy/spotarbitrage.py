@@ -1,4 +1,3 @@
-import heapq
 import logging
 
 from ceres.strategy.strategybase import StrategyBase
@@ -23,8 +22,8 @@ class OrderBook:
         self.asks = []
 
     def update(self, ex, obs):
-        heapq.heappush(self.bids, (-obs[ex]["bids"][0][0], ex))  # Negate bid prices for max heap
-        heapq.heappush(self.asks, (obs[ex]["asks"][0][0], ex))
+        self.bids[ex] = obs[ex]["bids"][0][0]
+        self.asks[ex] = obs[ex]["asks"][0][0]
 
 class SpotArbitrage(StrategyBase):
     def __init__(self, config, exchangeshandler) -> None:
@@ -56,8 +55,10 @@ class SpotArbitrage(StrategyBase):
             self.order_book.update(ex, obs)
 
     def _check_profit(self):
-        min_ask_price, min_ask_ex = heapq.heappop(self.order_book.asks)
-        max_bid_price, max_bid_ex = heapq.heappop(self.order_book.bids)
+        min_ask_ex = min(self.order_book.asks, key=self.order_book.asks.get)
+        max_bid_ex = max(self.order_book.bids, key=self.order_book.bids.get)
+        min_ask_price = self.order_book.asks[min_ask_ex]
+        max_bid_price = self.order_book.bids[max_bid_ex]
 
         max_bid_price = -max_bid_price  # Negate bid prices for max heap
 
