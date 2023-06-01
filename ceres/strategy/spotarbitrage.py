@@ -26,8 +26,6 @@ class OrderBook:
         heapq.heappush(self.bids, (-obs[ex]["bids"][0][0], ex))  # Negate bid prices for max heap
         heapq.heappush(self.asks, (obs[ex]["asks"][0][0], ex))
 
-
-
 class SpotArbitrage(StrategyBase):
     def __init__(self, config, exchangeshandler) -> None:
         super().__init__(config, exchangeshandler)
@@ -60,6 +58,8 @@ class SpotArbitrage(StrategyBase):
     def _check_profit(self):
         min_ask_price, min_ask_ex = heapq.heappop(self.order_book.asks)
         max_bid_price, max_bid_ex = heapq.heappop(self.order_book.bids)
+
+        max_bid_price = -max_bid_price  # Negate bid prices for max heap
 
         if min_ask_ex == max_bid_ex:
             return False, {}
